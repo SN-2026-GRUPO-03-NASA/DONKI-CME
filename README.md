@@ -21,10 +21,10 @@
 
 <p align="center">
   <!-- Substitua pela URL do GitHub Pages após publicar -->
-  <a href="https://SEU-USUARIO.github.io/DONKI-CME/">
+  <a href="https://nasa-cme.github.io/Nasa-Cme-Dashboard/">
     <img src="https://img.shields.io/badge/GitHub%20Pages-Live-blue?style=for-the-badge" alt="Live Demo">
   </a>
-  <a href="https://github.com/SN-2026-GRUPO-03-NASA/DONKI-CME">
+  <a href="https://github.com/nasa-cme/Nasa-Cme-Dashboard">
     <img src="https://img.shields.io/badge/GitHub-Repository-black?style=for-the-badge" alt="GitHub Repository">
   </a>
 </p>
@@ -157,7 +157,7 @@ DONKI-CME/
 ## Installation
 
 ```bash
-git clone https://github.com/SN-2026-GRUPO-03-NASA/DONKI-CME.git
+git clone https://github.com/nasa-cme/Nasa-Cme-Dashboard.git
 cd DONKI-CME
 ```
 
@@ -227,7 +227,7 @@ Deployed on **GitHub Pages**. Any push to `main` is reflected immediately.
 
 ```
 <!-- Substitua pela URL do GitHub Pages após publicar -->
-https://SEU-USUARIO.github.io/DONKI-CME/
+https://nasa-cme.github.io/Nasa-Cme-Dashboard/
 ```
 
 ---
@@ -239,8 +239,10 @@ https://SEU-USUARIO.github.io/DONKI-CME/
 
 ## Pendentes
 
-- `docs/tutorial.pdf` - Tutorial em PDF (a ser produzido)
-- `docs/apresentacao.pdf` - Apresentação em PDF (a ser produzido)
+- `docs/tutorial.pdf` - Tutorial em PDF (versão inicial gerada)
+- `docs/apresentacao.pdf` - Apresentação em PDF (versão inicial gerada)
+- `docs/ai-interaction.md` - Histórico de prompts (a preencher com interações reais)
+- `docs/reflexao.md` - Reflexão do grupo (a preencher)
 
 ---
 
@@ -257,6 +259,8 @@ https://SEU-USUARIO.github.io/DONKI-CME/
 | Name | GitHub |
 |---|---|
 | Murilo de Souza Cândido | [@murilotecoteco](https://github.com/murilotecoteco) |
+| Guilherme | — |
+| Yasmin C. | — |
 
 ---
 
