@@ -260,7 +260,7 @@ https://nasa-cme.github.io/Nasa-Cme-Dashboard/
 |---|---|
 | Murilo de Souza Cândido | [@murilotecoteco](https://github.com/murilotecoteco) |
 | Guilherme | — |
-| Yasmin C. | — |
+| Yasmin C. | [@Yasminc21](https://github.com/Yasminc21) |
 
 ---
 
