@@ -49,3 +49,42 @@ Este documento registra as interações com assistentes de IA durante o desenvol
 - **Pendências:** Executar novamente o workflow após confirmar que a chave está ativa
   no portal da NASA. Se ainda houver erro, consultar o status da API e os logs da
   execução.
+
+### 2026-11-03: Padronização das mensagens de commit
+
+- **Objetivo:** Definir uma regra única para as mensagens de commit do projeto.
+- **Contexto:** Os commits futuros precisam ser escritos em inglês e seguir uma
+  convenção reconhecida pela equipe.
+- **Ação:** Solicitação revisada: “Estabeleça uma regra para que todas as mensagens
+  de commit sejam escritas exclusivamente em inglês e sigam o padrão Conventional
+  Commits. Documente a regra nas instruções do projeto e no README, e registre este
+  prompt revisado no log de interações.”
+- **Resultado:** A regra foi adicionada às instruções do Copilot e ao README.
+  Também foram documentados os tipos permitidos, o uso do modo imperativo, a
+  descrição concisa e exemplos válidos.
+- **Decisões:** A regra se aplica aos novos commits. Commits existentes não serão
+  reescritos para preservar o histórico do repositório.
+- **Pendências:** Aplicar a convenção em todos os commits futuros.
+
+### 2026-11-03: Investigação da indisponibilidade do endpoint DONKI/CME
+
+- **Objetivo:** Determinar se as falhas persistentes do workflow eram causadas
+  pelo código, pela chave da API, pelo timeout ou pelo serviço da NASA.
+- **Contexto:** O workflow falhava desde 30 de setembro, apesar de a última
+  execução bem-sucedida, em 29 de setembro, ter retornado 119 registros.
+- **Ação:** Solicitação revisada: “Investigue profundamente as falhas do workflow
+  desde 28 de setembro. Compare as execuções bem-sucedidas e malsucedidas,
+  teste o endpoint DONKI/CME e um endpoint alternativo da NASA sem expor secrets,
+  documente as evidências e prepare um commit sem fazer push.”
+- **Resultado:** A primeira falha ocorreu em 30 de setembro e retornou HTTP `503`.
+  As execuções seguintes falharam no mesmo endpoint, inclusive após o timeout
+  ser aumentado para 80 segundos. Um teste direto com `DEMO_KEY` também retornou
+  `503`, enquanto o endpoint APOD retornou `200`. O Supabase permaneceu acessível
+  e registrou as execuções.
+- **Decisões:** O diagnóstico aponta para uma indisponibilidade persistente do
+  serviço DONKI/CME, não para um erro no código, no timeout ou exclusivamente na
+  chave do repositório. O retorno `API_KEY_INVALID` foi tratado como um problema
+  separado de configuração da credencial.
+- **Pendências:** Monitorar a recuperação do endpoint DONKI/CME. Considerar, em
+  uma alteração futura, um fallback que preserve os últimos dados válidos durante
+  indisponibilidades da NASA.

@@ -48,5 +48,24 @@ O pipeline é executado automaticamente via GitHub Actions (cron diário às 06:
 
 - Código JavaScript sem build step (vanilla JS)
 - Pipeline Python com tipagem e logging estruturado
-- Commits em português
+- Commits exclusivamente em inglês, seguindo o padrão Conventional Commits
 - Mensagens de erro descritivas para facilitar debug
+
+### Commits
+
+Use the Conventional Commits format:
+
+```text
+<type>(<optional scope>): <imperative description in English>
+```
+
+Allowed types include `feat`, `fix`, `docs`, `refactor`, `test`, `build`, `ci`,
+`chore`, and `perf`. Keep the subject concise, use the imperative mood, do not
+end it with a period, and write the complete commit message in English.
+
+Examples:
+
+```text
+fix: validate NASA API key in workflow
+docs: document GitHub Actions configuration
+```

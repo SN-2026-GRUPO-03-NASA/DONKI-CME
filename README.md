@@ -242,6 +242,26 @@ https://nasa-cme.github.io/Nasa-Cme-Dashboard/
 
 # Documentation
 
+## Commit conventions
+
+Commit messages must be written exclusively in English and follow the
+[Conventional Commits](https://www.conventionalcommits.org/) format:
+
+```text
+<type>(<optional scope>): <imperative description in English>
+```
+
+Use a recognized type such as `feat`, `fix`, `docs`, `refactor`, `test`, `build`,
+`ci`, `chore`, or `perf`. Keep the subject concise, use the imperative mood, and
+do not end it with a period.
+
+Examples:
+
+```text
+fix: validate NASA API key in workflow
+docs: document GitHub Actions configuration
+```
+
 - [AI Interaction Log](docs/ai-interaction.md) - Registro de interações com IA
 - [Reflexão do Grupo](docs/reflexao.md) - Reflexões sobre o desenvolvimento
 
@@ -259,6 +279,35 @@ https://nasa-cme.github.io/Nasa-Cme-Dashboard/
 - `DEMO_KEY` is rate-limited (~30 req/hour per IP) and may return HTTP 403 under heavy use. Registering a personal key at [api.nasa.gov](https://api.nasa.gov) resolves this.
 - DONKI events are typically published hours after detection, not in real time.
 - Data is updated daily via GitHub Actions cron schedule (06:00 UTC).
+
+## NASA DONKI/CME incident
+
+The update workflow experienced a persistent failure in the NASA DONKI/CME
+endpoint beginning on **September 30, 2026**:
+
+- The last successful execution was on September 29, 2026, and returned 119 CME
+  records.
+- The first failure on September 30 returned HTTP `503 Service Unavailable`.
+- Subsequent executions continued to fail at the NASA request, including manual
+  runs and runs using the updated 80-second request timeout.
+- A direct request using `DEMO_KEY` also returned HTTP `503`, confirming that the
+  failure was not specific to the repository secret.
+- The NASA APOD endpoint returned HTTP `200` during the same investigation, so
+  the evidence points specifically to the DONKI/CME service rather than a
+  complete NASA API outage.
+- Supabase remained available and continued to record each execution with the
+  `erro_critico` status.
+
+The `API_KEY_INVALID` response observed during troubleshooting is documented as
+a separate credential/configuration issue. The workflow reads `NASA_API_KEY`
+from GitHub Secrets and does not embed the key in the source code. The timeout
+increase does not resolve an HTTP `503`, because that status indicates a service
+availability failure rather than a client-side timeout.
+
+When DONKI/CME is unavailable, retry the workflow later and check the execution
+logs. A future resilience improvement could preserve the last successful data
+when the NASA service is unavailable, but that behavior is not currently
+implemented.
 
 ---
 
