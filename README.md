@@ -263,6 +263,7 @@ docs: document GitHub Actions configuration
 ```
 
 - [AI Interaction Log](docs/ai-interaction.md) - Registro de interações com IA
+- [NASA DONKI/CME Diagnosis](docs/diagnostico_nasa_donki_cme_copilot.md) - Investigação da instabilidade da API
 - [Reflexão do Grupo](docs/reflexao.md) - Reflexões sobre o desenvolvimento
 
 ## Pendentes

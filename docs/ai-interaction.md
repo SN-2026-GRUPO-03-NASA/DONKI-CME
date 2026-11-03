@@ -88,3 +88,31 @@ Este documento registra as interações com assistentes de IA durante o desenvol
 - **Pendências:** Monitorar a recuperação do endpoint DONKI/CME. Considerar, em
   uma alteração futura, um fallback que preserve os últimos dados válidos durante
   indisponibilidades da NASA.
+
+### 2026-11-03: Pesquisa externa sobre a instabilidade do DONKI/CME
+
+- **Objetivo:** Solicitar uma investigação na internet sobre a instabilidade
+  persistente do endpoint NASA DONKI/CME.
+- **Contexto:** O workflow falha com HTTP `503` desde 30 de setembro de 2026,
+  embora tenha funcionado até 29 de setembro. O relatório retornado pela pesquisa
+  foi salvo em
+  [diagnostico_nasa_donki_cme_copilot.md](diagnostico_nasa_donki_cme_copilot.md).
+- **Ação:** Prompt revisado fornecido: “Investigue na internet se a API NASA
+  DONKI/CME está enfrentando instabilidade ou indisponibilidade. Compare o
+  endpoint antigo `api.nasa.gov/DONKI/CME` com a documentação oficial atual,
+  priorize fontes confiáveis, procure relatos desde 30/09/2026, verifique
+  migrações, mudanças de URL, autenticação e alternativas oficiais. Diferencie
+  fatos confirmados, evidências indiretas e hipóteses; informe URLs, datas,
+  trechos relevantes e nível de confiança. Apresente resumo executivo, linha do
+  tempo, causas prováveis, testes adicionais e soluções temporária e definitiva.”
+- **Resultado:** A resposta identificou uma possível migração oficial do DONKI
+  para a infraestrutura CCMC, com novas URLs documentadas, e recomendou validar
+  o endpoint `https://ccmc.gsfc.nasa.gov/DONKI-API/get/CME` antes de alterar o
+  código. O documento também inclui testes comparativos, critérios de aceite e
+  orientações de segurança.
+- **Decisões:** O relatório foi armazenado como documentação de diagnóstico, sem
+  assumir que a migração resolveu o problema. Qualquer alteração no pipeline deve
+  ser feita somente após confirmar a resposta real da nova API e a compatibilidade
+  do schema.
+- **Pendências:** Validar a nova URL CCMC com a mesma janela de datas, comparar
+  respostas e decidir se a URL da API deve ser migrada.
