@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 NASA_API_BASE = "https://api.nasa.gov/DONKI/CME"
 BATCH_SIZE = 50  # Tamanho de cada lote para upsert
 MAX_RETRIES = 3  # Tentativas de retry para a API da NASA
-REQUEST_TIMEOUT = 30  # Timeout em segundos
+REQUEST_TIMEOUT = 80  # Timeout em segundos
 
 # Status possíveis para a tabela execucoes
 STATUS_CONCLUIDO = "concluido"
