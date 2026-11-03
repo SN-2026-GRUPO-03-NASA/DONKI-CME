@@ -116,3 +116,24 @@ Este documento registra as interações com assistentes de IA durante o desenvol
   do schema.
 - **Pendências:** Validar a nova URL CCMC com a mesma janela de datas, comparar
   respostas e decidir se a URL da API deve ser migrada.
+
+### 2026-11-03: Migração do endpoint DONKI para o CCMC
+
+- **Objetivo:** Corrigir a falha persistente do endpoint antigo e migrar o
+  pipeline para a API DONKI oficial do CCMC.
+- **Contexto:** A documentação oficial do CCMC indicou a nova base
+  `https://ccmc.gsfc.nasa.gov/DONKI-API/get/`. O endpoint CME antigo em
+  `api.nasa.gov` continuava retornando HTTP `503`.
+- **Ação:** Solicitação revisada: “Leia a documentação completa da API DONKI no
+  CCMC, valide o endpoint CME, compare o schema com o pipeline atual e faça a
+  migração com as atualizações necessárias de workflow e documentação.”
+- **Resultado:** O endpoint CCMC retornou HTTP `200` e 90 registros para a janela
+  de 30 dias testada. Os campos consumidos pelo normalizador permaneceram
+  compatíveis. O pipeline passou a usar a URL CCMC e deixou de enviar `api_key`,
+  pois a consulta validada não exige autenticação.
+- **Decisões:** O secret `NASA_API_KEY` não é mais necessário para este workflow,
+  embora possa permanecer no repositório para usos futuros. A validação final
+  depende de uma execução do GitHub Actions e da confirmação de gravação no
+  Supabase.
+- **Pendências:** Executar o workflow migrado e verificar se a coleta e o upsert
+  terminam com sucesso.

@@ -199,15 +199,11 @@ Add the following secrets to your repository (Settings → Secrets and variables
 |------|-------------|
 | `SUPABASE_URL` | Your Supabase project URL |
 | `SUPABASE_SERVICE_KEY` | Your Supabase service_role key |
-| `NASA_API_KEY` | Your NASA API key |
+| `NASA_API_KEY` | Não necessária para a API DONKI do CCMC |
 
-O workflow valida se `NASA_API_KEY` foi configurada antes de executar o pipeline.
-Essa validação informa apenas o tamanho da chave e nunca exibe seu valor nos logs.
-Cole no secret somente a chave, sem aspas, sem o prefixo `NASA_API_KEY=` e sem espaços
-no início ou no fim.
-
-Se a API retornar `API_KEY_INVALID`, confirme se a chave foi ativada no portal da
-[NASA API](https://api.nasa.gov) e execute o workflow novamente após salvar o secret.
+O pipeline usa a API DONKI oficial do CCMC, que aceita consultas CME sem
+`api_key`. O secret `NASA_API_KEY` pode permanecer configurado no repositório
+para outros usos, mas não é enviado nem necessário para este workflow.
 
 ## 3. Frontend Configuration
 
@@ -305,10 +301,10 @@ from GitHub Secrets and does not embed the key in the source code. The timeout
 increase does not resolve an HTTP `503`, because that status indicates a service
 availability failure rather than a client-side timeout.
 
-When DONKI/CME is unavailable, retry the workflow later and check the execution
-logs. A future resilience improvement could preserve the last successful data
-when the NASA service is unavailable, but that behavior is not currently
-implemented.
+The pipeline now uses the official CCMC endpoint
+`https://ccmc.gsfc.nasa.gov/DONKI-API/get/CME`, which returned HTTP `200` and
+90 records for the validation window used during the migration. When the CCMC
+service is unavailable, retry the workflow later and check the execution logs.
 
 ---
 

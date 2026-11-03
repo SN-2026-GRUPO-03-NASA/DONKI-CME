@@ -5,7 +5,7 @@
 
 ## 1. Contexto do problema
 
-- Endpoint atualmente utilizado: `https://api.nasa.gov/DONKI/CME`
+- Endpoint utilizado antes da migração: `https://api.nasa.gov/DONKI/CME`
 - O workflow funcionou até **29/09/2026**, retornando **119 registros**.
 - A partir de **30/09/2026**, começou a retornar `HTTP 503 Service Unavailable`.
 - A falha persistiu até **03/11/2026**.
@@ -176,8 +176,28 @@ for name, url, params in tests:
 - [ ] Falha de API não é confundida com lista vazia de eventos.
 - [ ] README/configuração documenta endpoint e autenticação.
 
-## 9. Orientação final
+## 9. Validação da migração para o CCMC
 
-Prioridade: **diagnosticar e validar a URL CCMC oficial antes de mexer em API keys, timeouts ou lógica de negócio**.
+A URL oficial do CCMC foi testada em 03/11/2026:
 
-O Copilot deve inspecionar o repositório e propor alterações pequenas, com testes e explicação do impacto. Não afirmar que a migração resolveu até que uma chamada real e os testes do projeto confirmem.
+- Endpoint: `https://ccmc.gsfc.nasa.gov/DONKI-API/get/CME`
+- Janela: `2026-10-04` a `2026-11-03`
+- Resultado: HTTP `200`
+- Registros retornados: 90
+- Autenticação: a consulta funcionou sem o parâmetro `api_key`
+- Schema: os campos usados pelo pipeline (`activityID`, `startTime`,
+  `instruments`, `sourceLocation`, `note`, `cmeAnalyses`, `linkedEvents` e
+  `link`) estão presentes
+
+O pipeline foi migrado para essa URL e não envia mais `NASA_API_KEY` para a
+requisição DONKI. A chave permanece fora do código e não é necessária para esse
+endpoint.
+
+## 10. Orientação final
+
+Prioridade: **manter a URL CCMC oficial e acompanhar a execução do workflow antes
+de fazer novas alterações em API keys, timeouts ou lógica de negócio**.
+
+A migração foi validada com uma chamada real e deve ser acompanhada por uma
+execução do GitHub Actions. Não considerar o incidente encerrado até que o
+workflow conclua a gravação no Supabase com sucesso.

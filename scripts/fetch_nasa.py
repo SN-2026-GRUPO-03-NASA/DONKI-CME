@@ -3,7 +3,7 @@
 fetch_nasa.py — Pipeline automatizado de coleta de dados CME da NASA DONKI API.
 
 Este script:
-  1. Consulta a API DONKI CME (https://api.nasa.gov/DONKI/CME)
+  1. Consulta a API DONKI CME do CCMC (https://ccmc.gsfc.nasa.gov/DONKI-API/get/CME)
   2. Normaliza os campos para o formato do banco Supabase
   3. Envia os dados ao Supabase em lotes (batch upsert)
   4. Realiza deduplicação antes do upsert para evitar erro PostgreSQL 21000
@@ -13,7 +13,7 @@ Este script:
 Variáveis de ambiente necessárias:
   - SUPABASE_URL: URL do projeto Supabase
   - SUPABASE_SERVICE_KEY: Chave de serviço (service_role) do Supabase
-  - NASA_API_KEY: Chave da API da NASA (opcional, padrão: DEMO_KEY)
+  - NASA_API_KEY: Não é necessária para a API DONKI do CCMC
 
 Tabelas esperadas no Supabase:
   - cme_events: tabela principal com os eventos CME normalizados
@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 # Constantes
 # ---------------------------------------------------------------------------
-NASA_API_BASE = "https://api.nasa.gov/DONKI/CME"
+NASA_API_BASE = "https://ccmc.gsfc.nasa.gov/DONKI-API/get/CME"
 BATCH_SIZE = 50  # Tamanho de cada lote para upsert
 MAX_RETRIES = 3  # Tentativas de retry para a API da NASA
 REQUEST_TIMEOUT = 80  # Timeout em segundos
@@ -127,7 +127,6 @@ def normalize_event(raw: dict) -> dict:
 
 
 def fetch_nasa_data(
-    api_key: str,
     start_date: str,
     end_date: str,
 ) -> list[dict]:
@@ -138,12 +137,11 @@ def fetch_nasa_data(
     params = {
         "startDate": start_date,
         "endDate": end_date,
-        "api_key": api_key,
     }
 
     for attempt in range(1, MAX_RETRIES + 1):
         try:
-            logger.info(f"Consultando API NASA (tentativa {attempt}/{MAX_RETRIES})...")
+            logger.info(f"Consultando API DONKI/CCMC (tentativa {attempt}/{MAX_RETRIES})...")
             response = requests.get(url, params=params, timeout=REQUEST_TIMEOUT)
             response.raise_for_status()
             data = response.json()
@@ -241,8 +239,6 @@ def run_pipeline() -> None:
     # 1. Configuração
     supabase_url = get_env_var("SUPABASE_URL", required=True)
     supabase_key = get_env_var("SUPABASE_SERVICE_KEY", required=True)
-    nasa_api_key = get_env_var("NASA_API_KEY", default="DEMO_KEY")
-
     # 2. Inicializar cliente Supabase
     supabase: Client | None = None
     try:
@@ -263,7 +259,7 @@ def run_pipeline() -> None:
 
     # 4. Buscar dados da API NASA
     try:
-        raw_data = fetch_nasa_data(nasa_api_key, start_str, end_str)
+        raw_data = fetch_nasa_data(start_str, end_str)
     except Exception as e:
         logger.error(f"Falha crítica ao buscar dados da NASA: {sanitize_error_message(e)}")
         register_execution(supabase, 0, 0, 1, STATUS_ERRO_CRITICO, sanitize_error_message(e))
