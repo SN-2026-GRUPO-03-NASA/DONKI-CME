@@ -273,7 +273,8 @@ docs: document GitHub Actions configuration
 
 # Known Limitations
 
-- `DEMO_KEY` is rate-limited (~30 req/hour per IP) and may return HTTP 403 under heavy use. Registering a personal key at [api.nasa.gov](https://api.nasa.gov) resolves this.
+- The DONKI/CCMC endpoint does not require a NASA API key for the current CME
+  queries.
 - DONKI events are typically published hours after detection, not in real time.
 - Data is updated daily via GitHub Actions cron schedule (06:00 UTC).
 
@@ -305,6 +306,10 @@ The pipeline now uses the official CCMC endpoint
 `https://ccmc.gsfc.nasa.gov/DONKI-API/get/CME`, which returned HTTP `200` and
 90 records for the validation window used during the migration. When the CCMC
 service is unavailable, retry the workflow later and check the execution logs.
+
+The migration was confirmed in GitHub Actions run `41649309627` on November 3,
+2026. The workflow fetched and normalized 90 records, wrote them to Supabase,
+registered the execution with status `concluido`, and finished successfully.
 
 ---
 

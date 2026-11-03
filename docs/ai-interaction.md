@@ -35,7 +35,7 @@ Este documento registra as interações com assistentes de IA durante o desenvol
 - **Contexto:** O pipeline passou a usar um timeout de 80 segundos, mas as execuções
   continuaram falhando. Os logs indicaram respostas `503 Service Unavailable` da API
   DONKI e, posteriormente, `API_KEY_INVALID`.
-- **Ação:** Solicitação revisada: “Investigue por que o workflow continua falhando,
+- **Ação:** Prompt revisado: “Investigue por que o workflow continua falhando,
   confirme se o timeout de 80 segundos está no commit e verifique a configuração da
   chave da NASA nos secrets do GitHub. Adicione uma validação segura ao workflow,
   documente o procedimento e prepare o commit.”
@@ -55,10 +55,10 @@ Este documento registra as interações com assistentes de IA durante o desenvol
 - **Objetivo:** Definir uma regra única para as mensagens de commit do projeto.
 - **Contexto:** Os commits futuros precisam ser escritos em inglês e seguir uma
   convenção reconhecida pela equipe.
-- **Ação:** Solicitação revisada: “Estabeleça uma regra para que todas as mensagens
-  de commit sejam escritas exclusivamente em inglês e sigam o padrão Conventional
-  Commits. Documente a regra nas instruções do projeto e no README, e registre este
-  prompt revisado no log de interações.”
+- **Ação:** Prompt revisado: “Defina uma regra para que todas as mensagens de
+  commit sejam escritas exclusivamente em inglês e sigam o padrão Conventional
+  Commits. Documente a regra nas instruções do projeto e no README, e registre
+  este prompt revisado no log de interações.”
 - **Resultado:** A regra foi adicionada às instruções do Copilot e ao README.
   Também foram documentados os tipos permitidos, o uso do modo imperativo, a
   descrição concisa e exemplos válidos.
@@ -72,10 +72,10 @@ Este documento registra as interações com assistentes de IA durante o desenvol
   pelo código, pela chave da API, pelo timeout ou pelo serviço da NASA.
 - **Contexto:** O workflow falhava desde 30 de setembro, apesar de a última
   execução bem-sucedida, em 29 de setembro, ter retornado 119 registros.
-- **Ação:** Solicitação revisada: “Investigue profundamente as falhas do workflow
-  desde 28 de setembro. Compare as execuções bem-sucedidas e malsucedidas,
-  teste o endpoint DONKI/CME e um endpoint alternativo da NASA sem expor secrets,
-  documente as evidências e prepare um commit sem fazer push.”
+- **Ação:** Prompt revisado: “Investigue a fundo as falhas do workflow desde 28
+  de setembro. Compare as execuções bem-sucedidas e malsucedidas, teste o endpoint
+  DONKI/CME e outro endpoint da NASA sem expor secrets, documente as evidências e
+  prepare um commit sem fazer push.”
 - **Resultado:** A primeira falha ocorreu em 30 de setembro e retornou HTTP `503`.
   As execuções seguintes falharam no mesmo endpoint, inclusive após o timeout
   ser aumentado para 80 segundos. Um teste direto com `DEMO_KEY` também retornou
@@ -97,14 +97,14 @@ Este documento registra as interações com assistentes de IA durante o desenvol
   embora tenha funcionado até 29 de setembro. O relatório retornado pela pesquisa
   foi salvo em
   [diagnostico_nasa_donki_cme_copilot.md](diagnostico_nasa_donki_cme_copilot.md).
-- **Ação:** Prompt revisado fornecido: “Investigue na internet se a API NASA
-  DONKI/CME está enfrentando instabilidade ou indisponibilidade. Compare o
-  endpoint antigo `api.nasa.gov/DONKI/CME` com a documentação oficial atual,
-  priorize fontes confiáveis, procure relatos desde 30/09/2026, verifique
-  migrações, mudanças de URL, autenticação e alternativas oficiais. Diferencie
-  fatos confirmados, evidências indiretas e hipóteses; informe URLs, datas,
-  trechos relevantes e nível de confiança. Apresente resumo executivo, linha do
-  tempo, causas prováveis, testes adicionais e soluções temporária e definitiva.”
+- **Ação:** Prompt revisado: “Pesquise na internet se a API NASA DONKI/CME está
+  instável ou indisponível. Compare o endpoint antigo `api.nasa.gov/DONKI/CME`
+  com a documentação oficial atual, priorize fontes confiáveis e procure relatos
+  desde 30/09/2026. Verifique migrações, mudanças de URL, autenticação e
+  alternativas oficiais. Diferencie fatos confirmados, evidências indiretas e
+  hipóteses, informando URLs, datas, trechos relevantes e nível de confiança.
+  Apresente um resumo, uma linha do tempo, as causas prováveis, testes adicionais
+  e soluções temporária e definitiva.”
 - **Resultado:** A resposta identificou uma possível migração oficial do DONKI
   para a infraestrutura CCMC, com novas URLs documentadas, e recomendou validar
   o endpoint `https://ccmc.gsfc.nasa.gov/DONKI-API/get/CME` antes de alterar o
@@ -124,9 +124,9 @@ Este documento registra as interações com assistentes de IA durante o desenvol
 - **Contexto:** A documentação oficial do CCMC indicou a nova base
   `https://ccmc.gsfc.nasa.gov/DONKI-API/get/`. O endpoint CME antigo em
   `api.nasa.gov` continuava retornando HTTP `503`.
-- **Ação:** Solicitação revisada: “Leia a documentação completa da API DONKI no
-  CCMC, valide o endpoint CME, compare o schema com o pipeline atual e faça a
-  migração com as atualizações necessárias de workflow e documentação.”
+- **Ação:** Prompt revisado: “Leia a documentação da API DONKI no CCMC, valide o
+  endpoint CME, compare o schema com o pipeline atual e faça a migração,
+  atualizando o workflow e a documentação necessários.”
 - **Resultado:** O endpoint CCMC retornou HTTP `200` e 90 registros para a janela
   de 30 dias testada. Os campos consumidos pelo normalizador permaneceram
   compatíveis. O pipeline passou a usar a URL CCMC e deixou de enviar `api_key`,
@@ -135,5 +135,21 @@ Este documento registra as interações com assistentes de IA durante o desenvol
   embora possa permanecer no repositório para usos futuros. A validação final
   depende de uma execução do GitHub Actions e da confirmação de gravação no
   Supabase.
-- **Pendências:** Executar o workflow migrado e verificar se a coleta e o upsert
-  terminam com sucesso.
+- **Pendências:** Nenhuma. A coleta, o upsert e o registro da execução foram
+  confirmados com sucesso no GitHub Actions.
+
+### 2026-11-03: Confirmação da migração em produção
+
+- **Objetivo:** Confirmar se a migração para o endpoint CCMC resolveu o problema.
+- **Contexto:** O código migrado já havia retornado 90 registros em um teste local.
+- **Ação:** Prompt revisado: “Verifique a execução mais recente do workflow,
+  confirme se a migração funcionou e atualize os arquivos Markdown necessários.
+  Registre a sequência de prompts, pesquisas e resultados de forma organizada,
+  corrigindo erros de português sem deixar o texto excessivamente formal.”
+- **Resultado:** A execução `41649309627` foi concluída com sucesso. O pipeline
+  consultou o CCMC, retornou 90 registros, normalizou os dados, gravou no
+  Supabase e registrou o status `concluido`.
+- **Decisões:** O incidente foi considerado resolvido após a confirmação em
+  produção. A documentação mantém a linha do tempo, as evidências, os prompts
+  revisados e o resultado final.
+- **Pendências:** Continuar monitorando as execuções diárias do workflow.

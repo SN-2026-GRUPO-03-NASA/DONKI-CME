@@ -165,16 +165,16 @@ for name, url, params in tests:
 
 ## 8. Critérios de aceite para uma correção
 
-- [ ] Endpoint CCMC validado com resposta HTTP bem-sucedida.
-- [ ] Requisição equivalente retorna dados CME válidos.
-- [ ] Campos necessários ao workflow permanecem compatíveis.
-- [ ] Configuração da URL fica centralizada (variável/config).
-- [ ] Erros HTTP são tratados explicitamente.
-- [ ] Retry com backoff não gera tempestade de requisições.
-- [ ] Logs não contêm segredo/API key.
-- [ ] Testes automatizados cobrem sucesso, 503, timeout e JSON inválido.
-- [ ] Falha de API não é confundida com lista vazia de eventos.
-- [ ] README/configuração documenta endpoint e autenticação.
+- [x] Endpoint CCMC validado com resposta HTTP bem-sucedida.
+- [x] Requisição equivalente retorna dados CME válidos.
+- [x] Campos necessários ao workflow permanecem compatíveis.
+- [x] Configuração da URL fica centralizada no pipeline.
+- [x] Erros HTTP são tratados explicitamente.
+- [x] O limite de tentativas evita uma tempestade de requisições.
+- [x] Logs não contêm segredo ou API key.
+- [ ] Testes automatizados específicos cobrem sucesso, 503, timeout e JSON inválido.
+- [x] Falha de API não é confundida com lista vazia de eventos.
+- [x] README/configuração documenta endpoint e autenticação.
 
 ## 9. Validação da migração para o CCMC
 
@@ -198,6 +198,19 @@ endpoint.
 Prioridade: **manter a URL CCMC oficial e acompanhar a execução do workflow antes
 de fazer novas alterações em API keys, timeouts ou lógica de negócio**.
 
-A migração foi validada com uma chamada real e deve ser acompanhada por uma
-execução do GitHub Actions. Não considerar o incidente encerrado até que o
-workflow conclua a gravação no Supabase com sucesso.
+A migração foi validada com uma chamada real e por uma execução bem-sucedida do
+GitHub Actions, incluindo a gravação no Supabase.
+
+## 11. Resultado final
+
+O workflow migrado foi executado com sucesso no GitHub Actions:
+
+- Execução: `41649309627`
+- Data: 03/11/2026
+- Período consultado: `2026-10-04` a `2026-11-03`
+- Registros retornados e normalizados: 90
+- Gravação no Supabase: concluída
+- Status registrado em `execucoes`: `concluido`
+- Resultado do job: sucesso
+
+Com essa execução, a migração para o endpoint CCMC foi confirmada em produção.
