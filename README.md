@@ -199,7 +199,15 @@ Add the following secrets to your repository (Settings → Secrets and variables
 |------|-------------|
 | `SUPABASE_URL` | Your Supabase project URL |
 | `SUPABASE_SERVICE_KEY` | Your Supabase service_role key |
-| `NASA_API_KEY` | Your NASA API key (optional, defaults to DEMO_KEY) |
+| `NASA_API_KEY` | Your NASA API key |
+
+O workflow valida se `NASA_API_KEY` foi configurada antes de executar o pipeline.
+Essa validação informa apenas o tamanho da chave e nunca exibe seu valor nos logs.
+Cole no secret somente a chave, sem aspas, sem o prefixo `NASA_API_KEY=` e sem espaços
+no início ou no fim.
+
+Se a API retornar `API_KEY_INVALID`, confirme se a chave foi ativada no portal da
+[NASA API](https://api.nasa.gov) e execute o workflow novamente após salvar o secret.
 
 ## 3. Frontend Configuration
 

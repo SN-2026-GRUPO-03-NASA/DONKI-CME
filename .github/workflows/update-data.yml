@@ -35,6 +35,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests supabase
 
+      - name: Validate NASA API key
+        env:
+          NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
+        run: |
+          if [ -z "$NASA_API_KEY" ]; then
+            echo "::error::O secret NASA_API_KEY não está configurado ou está vazio."
+            exit 1
+          fi
+          echo "NASA_API_KEY configurada (${#NASA_API_KEY} caracteres)."
+
       - name: Run NASA data fetch pipeline
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
