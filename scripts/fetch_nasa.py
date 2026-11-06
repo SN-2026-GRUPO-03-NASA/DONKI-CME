@@ -30,9 +30,6 @@ from typing import Any
 import requests
 from supabase import create_client, Client
 
-# ---------------------------------------------------------------------------
-# Configuração de logging
-# ---------------------------------------------------------------------------
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
