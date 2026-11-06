@@ -3,16 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CME WATCH // NASA DONKI Space Weather Dashboard</title>
+  <title>CME Watch | Monitor de Ejeções de Massa Coronal (NASA DONKI)</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Michroma&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="scanlines"></div>
-<div class="noise"></div>
+<div class="stars"></div>
 
 <div class="crt-wrap">
 
@@ -22,7 +21,7 @@
       <div class="brand-mark">☉</div>
       <div class="brand-text">
         <h1>CME <span>WATCH</span></h1>
-        <p class="brand-sub">DONKI CORONAL MASS EJECTION TRACKER // NASA OPEN DATA</p>
+        <p class="brand-sub">Monitor de ejeções de massa coronal · dados abertos da NASA</p>
       </div>
     </div>
     <div class="topbar__status">
@@ -31,14 +30,26 @@
     </div>
   </header>
 
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero__text">
+      <span class="eyebrow">CLIMA ESPACIAL</span>
+      <h2>O Sol também tem tempestades.</h2>
+      <p>De tempos em tempos o Sol lança ao espaço uma nuvem gigante de plasma e campo magnético: uma <strong>ejeção de massa coronal (CME)</strong>. Aqui você acompanha esses eventos registrados pela NASA, com gráfico, filtros e detalhes de cada um.</p>
+      <div class="hero__btns"><a class="btn-link" href="#painel">Ver o painel</a><a class="btn-link btn-link--ghost" href="#entender">Entender as CMEs</a></div>
+    </div>
+    <div class="sun" aria-hidden="true"><i></i><i></i><i></i><b></b></div>
+  </section>
+
+  <div id="painel"></div>
   <!-- CONTROL DECK -->
   <section class="control-deck">
     <div class="field">
-      <label for="startDate">RANGE START</label>
+      <label for="startDate">DATA INICIAL</label>
       <input type="date" id="startDate">
     </div>
     <div class="field">
-      <label for="endDate">RANGE END</label>
+      <label for="endDate">DATA FINAL</label>
       <input type="date" id="endDate">
     </div>
     <div class="field field--action">
@@ -73,7 +84,7 @@
       <span class="stat-value" id="statMaxSpeed">—<small>km/s</small></span>
     </div>
     <div class="stat-card">
-      <span class="stat-label">EARTH-DIRECTED</span>
+      <span class="stat-label">DIRECIONADAS À TERRA</span>
       <span class="stat-value" id="statEarthDirected">—</span>
     </div>
   </section>
@@ -92,7 +103,7 @@
       </div>
     </section>
 
-    <!-- EVENT LIST PANL -->
+    <!-- EVENT LIST PANEL -->
     <section class="panel panel--list">
       <div class="panel__head">
         <h2>LOG DE EVENTOS <span class="tag" id="listCount">0 registros</span></h2>
@@ -111,13 +122,82 @@
 
   </main>
 
+  <!-- INFORMAÇÕES -->
+  <section class="info" id="entender">
+    <h2 class="info__title">Entendendo as ejeções de massa coronal</h2>
+    <div class="info__grid">
+      <article class="card card--wide">
+        <h3>O que é uma CME?</h3>
+        <p>É uma enorme explosão de gás ionizado (plasma) junto com campo magnético que se solta da coroa, a camada mais externa da atmosfera do Sol. Cada ejeção leva bilhões de toneladas de material para o espaço e costuma aparecer perto de manchas solares, onde o campo magnético é mais intenso.</p>
+        <p>Quando a nuvem vem na direção da Terra, ela bate no nosso campo magnético e pode causar uma <strong>tempestade geomagnética</strong>. A frequência muda com o ciclo solar (cerca de 11 anos): perto do mínimo aparece uma CME a cada poucos dias, e no máximo podem ser três ou mais por dia.</p>
+      </article>
+      <article class="card">
+        <h3>CME x erupção solar</h3>
+        <p><b>Erupção (flare):</b> clarão de luz e radiação. Chega à Terra em cerca de 8 minutos.</p>
+        <p><b>CME:</b> nuvem de matéria. Leva de horas a dias para chegar. As duas podem acontecer juntas, mas são fenômenos diferentes.</p>
+      </article>
+    </div>
+    <div class="facts">
+      <div><strong>Bilhões</strong><span>de toneladas de plasma por ejeção</span></div>
+      <div><strong>250–3000</strong><span>km/s, faixa de velocidades observadas</span></div>
+      <div><strong>~150 mi km</strong><span>distância do Sol até a Terra</span></div>
+      <div><strong>15 h – 5 dias</strong><span>tempo de viagem até a Terra</span></div>
+    </div>
+
+    <div class="info__grid">
+      <article class="card">
+        <h3>Tipos por velocidade</h3>
+        <p class="small">O DONKI classifica cada CME em uma letra, conforme a velocidade.</p>
+        <table class="mini">
+          <tr><td><span class="pill p1">S</span></td><td>menos de 500 km/s</td><td>lenta</td></tr>
+          <tr><td><span class="pill p2">C</span></td><td>500 a 999 km/s</td><td>comum</td></tr>
+          <tr><td><span class="pill p3">O</span></td><td>1000 a 1999 km/s</td><td>rápida</td></tr>
+          <tr><td><span class="pill p4">R</span></td><td>2000 a 2999 km/s</td><td>muito rápida</td></tr>
+          <tr><td><span class="pill p5">ER</span></td><td>3000 km/s ou mais</td><td>extrema</td></tr>
+        </table>
+      </article>
+      <article class="card calc">
+        <h3>Quando ela chega aqui?</h3>
+        <p class="small">Mexa na velocidade e veja a estimativa (velocidade constante, sem considerar frenagem no caminho).</p>
+        <input type="range" id="spd" min="200" max="3000" step="10" value="500">
+        <div class="calc__out"><span><b id="spdVal">500</b> km/s</span><span class="calc__eta" id="eta">—</span></div>
+        <span class="small" id="etaClass"></span>
+      </article>
+      <article class="card">
+        <h3>O que ela pode causar</h3>
+        <ul>
+          <li>Auroras boreais e austrais mais intensas e em latitudes menores</li>
+          <li>Falhas em satélites e erros de GPS</li>
+          <li>Interferência em rádio de alta frequência</li>
+          <li>Sobrecarga em redes elétricas</li>
+          <li>Desvio de voos polares e mais cuidado com astronautas</li>
+        </ul>
+      </article>
+    </div>
+
+    <h3 class="sub">Tempestades que marcaram a história</h3>
+    <div class="timeline">
+      <div><b>1859</b><span>Evento Carrington. Telégrafos falharam e auroras apareceram em regiões tropicais.</span></div>
+      <div><b>1989</b><span>Uma tempestade derrubou a rede elétrica de Quebec, no Canadá, por cerca de 9 horas.</span></div>
+      <div><b>Maio de 2024</b><span>Tempestade de nível G5, a mais forte em cerca de 20 anos, com auroras vistas em muitos países.</span></div>
+    </div>
+
+    <h3 class="sub">Mini glossário</h3>
+    <dl class="gloss">
+      <div><dt>Direcionada à Terra</dt><dd>CME cuja trajetória aponta para o nosso planeta e por isso merece mais atenção.</dd></div>
+      <div><dt>CME halo</dt><dd>Aparece como um anel em volta do Sol nas imagens, sinal de que a nuvem vem em nossa direção (ou se afasta).</dd></div>
+      <div><dt>Coronógrafo</dt><dd>Instrumento que bloqueia o disco do Sol para enxergar a coroa. É como as CMEs são detectadas (ex.: SOHO/LASCO).</dd></div>
+      <div><dt>Escala G</dt><dd>Escala da NOAA de G1 (fraca) a G5 (extrema) para tempestades geomagnéticas.</dd></div>
+    </dl>
+  </section>
+
   <!-- LAST UPDATE INFO -->
   <div class="last-update" id="lastUpdate">
     <span>Última atualização do pipeline: <strong id="lastUpdateText">—</strong></span>
   </div>
 
   <footer class="footer">
-    <p>Fonte de dados: NASA DONKI API via Supabase — <span>api.nasa.gov</span></p>
+    <p>Fonte de dados: NASA DONKI (CCMC) via Supabase · Projeto do Grupo 03, IFPR 2026</p>
   </footer>
 
 </div>
@@ -135,5 +215,13 @@
 </div>
 
 <script src="script.js"></script>
+<script>
+(function(){var r=document.getElementById('spd'),o=document.getElementById('spdVal'),t=document.getElementById('eta'),c=document.getElementById('etaClass');
+function u(){var v=+r.value,h=149600000/v/3600;o.textContent=v;
+t.textContent=(h<48?h.toFixed(1)+' horas':(h/24).toFixed(1)+' dias').replace('.',',');
+c.textContent=v<500?'Tipo S (lenta)':v<1000?'Tipo C (comum)':v<2000?'Tipo O (rápida)':v<3000?'Tipo R (muito rápida)':'Tipo ER (extrema)';}
+r.addEventListener('input',u);u();})();
+</script>
+
 </body>
 </html>
