@@ -30,6 +30,8 @@ from typing import Any
 import requests
 from supabase import create_client, Client
 
+# Configura o formato comum dos logs. O GitHub Actions usa essas mensagens
+# para mostrar em que etapa o pipeline está e onde ocorreu algum problema.
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -56,7 +58,8 @@ STATUS_ERRO_CRITICO = "erro_critico"
 # ---------------------------------------------------------------------------
 
 def get_env_var(name: str, default: str | None = None, required: bool = False) -> str:
-    """Obtém variável de ambiente com validação."""
+    """Lê uma configuração do ambiente e valida se ela é obrigatória."""
+    # Variáveis de ambiente permitem usar secrets sem gravá-los no código.
     value = os.environ.get(name, default)
     if required and not value:
         logger.error(f"Variável de ambiente obrigatória '{name}' não definida.")
@@ -69,6 +72,8 @@ def sanitize_error_message(error: Exception) -> str:
     Remove chaves de API de mensagens de erro antes de registrar.
     Previne exposição de secrets em logs.
     """
+    # Converte a exceção para texto e remove padrões que poderiam expor
+    # credenciais nos logs públicos do CI.
     message = str(error)
     # Remover padrões comuns de chaves de API
     import re
@@ -83,6 +88,9 @@ def pick_best_analysis(analyses: list[dict] | None) -> dict | None:
     """Seleciona a melhor análise CME (isMostAccurate ou a última)."""
     if not analyses:
         return None
+    # A API pode retornar várias análises para o mesmo evento. Preferimos a que
+    # a própria NASA marcou como mais precisa; se nenhuma tiver essa marcação,
+    # usamos a última disponível.
     most_accurate = next((a for a in analyses if a.get("isMostAccurate")), None)
     return most_accurate or analyses[-1]
 
@@ -91,6 +99,9 @@ def is_earth_directed(analysis: dict | None) -> bool:
     """Heurística simples para detectar CMEs direcionados à Terra."""
     if not analysis:
         return False
+    # Latitude e longitude próximas de zero indicam uma origem voltada para a
+    # região central do disco solar, usada aqui como aproximação da direção da
+    # Terra. É uma heurística, não uma previsão orbital completa.
     lat = analysis.get("latitude")
     lon = analysis.get("longitude")
     if lat is None or lon is None:
@@ -102,6 +113,8 @@ def normalize_event(raw: dict) -> dict:
     """
     Normaliza um registro bruto da API DONKI para o formato do banco.
     """
+    # Esta é a etapa de transformação: nomes e estruturas da NASA são
+    # convertidos para as colunas simples esperadas pela tabela cme_events.
     analysis = pick_best_analysis(raw.get("cmeAnalyses"))
     activity_id = raw.get("activityID")
     
@@ -130,16 +143,20 @@ def fetch_nasa_data(
     """
     Busca dados CME da API DONKI da NASA.
     """
+    # A URL é constante; o período é enviado como parâmetros da requisição.
     url = f"{NASA_API_BASE}"
     params = {
         "startDate": start_date,
         "endDate": end_date,
     }
 
+    # Repetimos somente falhas de rede/HTTP. Isso torna o pipeline resistente a
+    # uma indisponibilidade momentânea sem esconder uma falha definitiva.
     for attempt in range(1, MAX_RETRIES + 1):
         try:
             logger.info(f"Consultando API DONKI/CCMC (tentativa {attempt}/{MAX_RETRIES})...")
             response = requests.get(url, params=params, timeout=REQUEST_TIMEOUT)
+            # Converte respostas 4xx/5xx em exceções tratáveis pelo retry.
             response.raise_for_status()
             data = response.json()
             logger.info(f"API retornou {len(data)} registros.")
@@ -155,6 +172,7 @@ def deduplicate_records(records: list[dict]) -> list[dict]:
     Remove duplicatas baseado na chave natural (activity_id).
     Evita o erro PostgreSQL 21000 (unique_violation) durante o upsert.
     """
+    # O conjunto seen_ids faz a consulta de duplicidade em tempo constante.
     seen_ids = set()
     unique_records = []
     duplicates_count = 0
@@ -178,6 +196,8 @@ def upsert_batch(supabase: Client, records: list[dict]) -> int:
     Realiza upsert de um lote de registros no Supabase.
     Retorna o número de registros processados com sucesso.
     """
+    # Upsert significa "insert ou update": registros existentes são atualizados
+    # e registros novos são inseridos, usando activity_id como chave de conflito.
     try:
         result = supabase.table("cme_events").upsert(
             records,
@@ -201,6 +221,8 @@ def register_execution(
     Registra a execução na tabela 'execucoes'.
     Se supabase for None, apenas loga o erro.
     """
+    # Mesmo uma execução sem dados ou com erro é registrada para permitir
+    # auditoria do pipeline e exibição da última atualização no site.
     execution_data = {
         "executed_at": datetime.now(timezone.utc).isoformat(),
         "registros_processados": registros_processados,
@@ -233,10 +255,11 @@ def run_pipeline() -> None:
     logger.info("Iniciando pipeline de coleta de dados CME")
     logger.info("=" * 60)
 
-    # 1. Configuração
+    # 1. Configuração: carrega a URL e a service key sem expor o segredo no
+    # código-fonte. A service key só deve existir no ambiente do servidor/CI.
     supabase_url = get_env_var("SUPABASE_URL", required=True)
     supabase_key = get_env_var("SUPABASE_SERVICE_KEY", required=True)
-    # 2. Inicializar cliente Supabase
+    # 2. Inicializar cliente Supabase, responsável por chamar o banco via API.
     supabase: Client | None = None
     try:
         supabase = create_client(supabase_url, supabase_key)
@@ -246,7 +269,8 @@ def run_pipeline() -> None:
         register_execution(None, 0, 0, 1, STATUS_ERRO_CRITICO, sanitize_error_message(e))
         sys.exit(1)
 
-    # 3. Definir período de busca (últimos 30 dias por padrão)
+    # 3. Definir período de busca (últimos 30 dias por padrão). Tudo é UTC para
+    # evitar que o fuso do runner altere o intervalo consultado.
     end_date = datetime.now(timezone.utc).date();
     start_date = end_date - timedelta(days=30);
     start_str = start_date.isoformat();
@@ -254,7 +278,7 @@ def run_pipeline() -> None:
 
     logger.info(f"Período de busca: {start_str} a {end_str}")
 
-    # 4. Buscar dados da API NASA
+    # 4. Buscar dados brutos na fonte oficial da NASA.
     try:
         raw_data = fetch_nasa_data(start_str, end_str)
     except Exception as e:
@@ -262,23 +286,26 @@ def run_pipeline() -> None:
         register_execution(supabase, 0, 0, 1, STATUS_ERRO_CRITICO, sanitize_error_message(e))
         sys.exit(1)
 
-    # 5. Tratar resposta vazia como execução válida
+    # 5. Uma resposta vazia não é erro: significa apenas que não houve CME no
+    # período consultado.
     if not raw_data:
         logger.info("Nenhum dado retornado pela API. Registrando execução como válida.")
         register_execution(supabase, 0, 0, 0, STATUS_CONCLUIDO, "Nenhum dado no período")
         sys.exit(0)
 
-    # 6. Normalizar dados
+    # 6. Normalizar cada item para o formato da tabela do Supabase.
     logger.info("Normalizando registros...")
     normalized_records = [normalize_event(raw) for raw in raw_data]
     logger.info(f"{len(normalized_records)} registros normalizados.")
 
-    # 7. Deduplicação
+    # 7. Remover itens repetidos antes do upsert para que cada chave apareça uma
+    # única vez no mesmo lote.
     logger.info("Realizando deduplicação...")
     unique_records = deduplicate_records(normalized_records)
     logger.info(f"{len(unique_records)} registros únicos após deduplicação.")
 
-    # 8. Upsert em lotes
+    # 8. Enviar em lotes para controlar o tamanho das requisições e permitir que
+    # os demais lotes continuem mesmo se um lote isolado falhar.
     logger.info(f"Enviando dados ao Supabase em lotes de {BATCH_SIZE}...")
     total_processed = 0
     total_batches = 0
@@ -286,6 +313,8 @@ def run_pipeline() -> None:
     error_messages = []
 
     for i in range(0, len(unique_records), BATCH_SIZE):
+        # O slice termina no limite do lote ou no fim da lista, o que também
+        # trata corretamente o último lote quando ele é menor que BATCH_SIZE.
         batch = unique_records[i : i + BATCH_SIZE]
         batch_num = (i // BATCH_SIZE) + 1
         total_batches += 1
@@ -300,7 +329,7 @@ def run_pipeline() -> None:
             error_messages.append(error_msg)
             logger.error(f"Erro no lote {batch_num}: {e}")
 
-    # 9. Determinar status final
+    # 9. Determinar status final: sucesso total, erro parcial ou erro crítico.
     if total_errors == 0:
         status = STATUS_CONCLUIDO
         detalhes = None
@@ -311,7 +340,7 @@ def run_pipeline() -> None:
         status = STATUS_ERRO_CRITICO
         detalhes = "; ".join(error_messages)
 
-    # 10. Registrar execução
+    # 10. Persistir métricas antes de encerrar o processo.
     register_execution(
         supabase,
         registros_processados=total_processed,
@@ -321,7 +350,7 @@ def run_pipeline() -> None:
         detalhes=detalhes,
     )
 
-    # 11. Resultado final
+    # 11. Escrever um resumo legível no log do pipeline.
     logger.info("=" * 60)
     logger.info(f"Pipeline concluído com status: {status}")
     logger.info(f"  - Registros processados: {total_processed}")
@@ -329,7 +358,8 @@ def run_pipeline() -> None:
     logger.info(f"  - Erros: {total_errors}")
     logger.info("=" * 60)
 
-    # 12. Exit code para o GitHub Actions
+    # 12. O código de saída informa ao GitHub Actions se o job deve ser marcado
+    # como sucesso (0) ou falha (1).
     if status == STATUS_ERRO_CRITICO:
         logger.error("Pipeline falhou criticamente. Encerrando com exit code 1.")
         sys.exit(1)

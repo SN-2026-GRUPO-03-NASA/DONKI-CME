@@ -3,6 +3,7 @@
    ========================================================================== */
 
 :root {
+  /* Variáveis centralizam cores, fontes e medidas para o tema inteiro. */
   --bg-void: #050705;
   --bg-panel: #0a100c;
   --bg-panel-raised: #0e1610;
@@ -28,6 +29,8 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* Remove margens padrão e faz padding/borda caberem dentro da largura. */
+
 html, body {
   background: var(--bg-void);
   color: var(--text-hi);
@@ -44,8 +47,11 @@ body {
     var(--bg-void);
 }
 
+/* Dois gradientes radiais simulam o brilho do Sol sobre o fundo escuro. */
+
 /* CRT overlays */
 .scanlines {
+  /* Linhas horizontais decorativas do efeito CRT; não interceptam cliques. */
   position: fixed; inset: 0; pointer-events: none; z-index: 100;
   background: repeating-linear-gradient(
     to bottom,
@@ -58,12 +64,14 @@ body {
 }
 
 .noise {
+  /* SVG com ruído fractal cria uma textura discreta de tela antiga. */
   position: fixed; inset: 0; pointer-events: none; z-index: 99;
   opacity: 0.035;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 .crt-wrap {
+  /* Conteúdo centralizado com largura máxima para telas grandes. */
   position: relative;
   max-width: 1320px;
   margin: 0 auto;
@@ -82,6 +90,7 @@ body {
    ========================================================================== */
 
 .topbar {
+  /* Flex permite manter marca e status lado a lado e quebrar em telas menores. */
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -157,6 +166,7 @@ body {
    ========================================================================== */
 
 .control-deck {
+  /* Grid distribui campos, botão e atalhos em colunas previsíveis. */
   display: grid;
   grid-template-columns: 1fr 1fr 1.6fr auto;
   gap: 16px;
@@ -202,6 +212,7 @@ body {
 .field input::-webkit-calendar-picker-indicator { filter: invert(0.7) sepia(1) saturate(3) hue-rotate(70deg); }
 
 .btn-fetch {
+  /* Botão principal recebe destaque visual e estados de interação. */
   display: flex; align-items: center; justify-content: center; gap: 10px;
   background: var(--phosphor);
   color: #04140a;
@@ -249,6 +260,7 @@ body {
    ========================================================================== */
 
 .alert-bar {
+  /* A barra só aparece quando o JavaScript remove o atributo hidden. */
   background: rgba(255,77,94,0.1);
   border: 1px solid var(--danger);
   color: #ffb3ba;
@@ -264,6 +276,7 @@ body {
    ========================================================================== */
 
 .stats-grid {
+  /* Os quatro cards resumem o conjunto filtrado de eventos. */
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 14px;
@@ -313,6 +326,7 @@ body {
    ========================================================================== */
 
 .main-grid {
+  /* Área responsiva que organiza gráfico e lista de eventos. */
   display: grid;
   grid-template-columns: 1.3fr 1fr;
   gap: 18px;
@@ -370,6 +384,7 @@ body {
 .panel__body { padding: 20px; position: relative; }
 
 /* Chart */
+/* O canvas ocupa o painel; os desenhos são feitos no script.js. */
 .panel--chart .panel__body { min-height: 320px; }
 #speedChart { width: 100%; height: 280px; display: block; }
 .chart-empty {
@@ -382,6 +397,7 @@ body {
 }
 
 /* Event list */
+/* Cards são elementos interativos gerados dinamicamente pelo JavaScript. */
 .panel--list .panel__body {
   max-height: 640px;
   overflow-y: auto;
@@ -464,6 +480,7 @@ body {
    ========================================================================== */
 
 .modal-overlay {
+  /* Camada cobre a tela e centraliza o cartão de detalhes. */
   position: fixed; inset: 0; z-index: 200;
   background: rgba(2,6,3,0.8);
   backdrop-filter: blur(4px);
@@ -545,6 +562,7 @@ body {
    ========================================================================== */
 
 @media (max-width: 980px) {
+  /* Em tablets, reduzimos as colunas para evitar controles apertados. */
   .main-grid { grid-template-columns: 1fr; }
   .control-deck { grid-template-columns: 1fr 1fr; }
   .field--key { grid-column: 1 / -1; }
@@ -553,6 +571,7 @@ body {
 }
 
 @media (max-width: 560px) {
+  /* Em celulares, cada controle ocupa uma linha e o texto ganha espaço. */
   .crt-wrap { padding: 18px 16px 40px; }
   .control-deck { grid-template-columns: 1fr; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
@@ -561,6 +580,7 @@ body {
 
 
 /* ===== NOVO TEMA: SOLAR ===== */
+/* Ajustes finais do tema visual: substituem tokens antigos por cores solares. */
 :root{--bg-void:#070a1a;--bg-panel:#101630;--bg-panel-raised:#161e40;--line:#232c5a;--line-bright:#3a4580;
 --phosphor:#ffb347;--phosphor-dim:#c97a1a;--amber:#ff7a45;--amber-dim:#b3502a;--danger:#ff4d6d;--cyan:#5ad1ff;
 --text-hi:#f3f5ff;--text-mid:#b0b9dd;--text-dim:#7681b3;--radius:14px;

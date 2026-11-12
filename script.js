@@ -7,6 +7,10 @@
 (() => {
   'use strict';
 
+  // Todo o código fica dentro desta função autoexecutável. Isso cria um
+  // "escopo privado": variáveis como SUPABASE_ANON_KEY não ficam disponíveis
+  // diretamente no objeto global do navegador.
+
   /* ------------------------------------------------------------------ */
   /* Configuração do Supabase (apenas chave pública anon)                */
   /* ------------------------------------------------------------------ */
@@ -15,6 +19,9 @@
 
   const SUPABASE_ENDPOINT = `${SUPABASE_URL}/rest/v1`;
 
+  // Guardamos referências aos elementos da página uma única vez. Assim, as
+  // funções abaixo podem atualizar a interface sem procurar o mesmo elemento
+  // no DOM repetidamente.
   const els = {
     startDate: document.getElementById('startDate'),
     endDate: document.getElementById('endDate'),
@@ -42,11 +49,16 @@
   let currentEvents = [];
   let currentSort = 'date';
 
+  // currentEvents é a "fonte de verdade" da tela: lista atual, estatísticas,
+  // gráfico e modal são todos montados a partir deste array.
+
   /* ------------------------------------------------------------------ */
   /* Clock                                                               */
   /* ------------------------------------------------------------------ */
 
   function tickClock() {
+    // O relógio mostra a hora local do navegador e o deslocamento UTC
+    // correspondente, sendo atualizado uma vez por segundo.
     const now = new Date();
     els.clock.textContent = now.toLocaleTimeString('pt-BR', { hour12: false }) + ' UTC' +
       (now.getTimezoneOffset() <= 0 ? '+' : '-') +
@@ -60,10 +72,14 @@
   /* ------------------------------------------------------------------ */
 
   function fmtDate(d) {
+    // Input[type=date] aceita o formato YYYY-MM-DD; ISO evita ambiguidades
+    // entre os formatos de data usados em diferentes países.
     return d.toISOString().slice(0, 10);
   }
 
   function setRange(days) {
+    // Calcula um intervalo contado para trás a partir de hoje e preenche os
+    // dois campos de data do painel.
     const end = new Date();
     const start = new Date();
     start.setDate(start.getDate() - days);
@@ -74,6 +90,7 @@
 
   document.querySelectorAll('.chip').forEach(chip => {
     chip.addEventListener('click', () => {
+      // Atributo data-range vem do HTML (7, 30, 90 ou 365 dias).
       document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
       chip.classList.add('active');
       setRange(Number(chip.dataset.range));
@@ -85,11 +102,13 @@
   /* ------------------------------------------------------------------ */
 
   function setStatus(mode, text) {
+    // A classe mode muda a cor/animação do indicador (loading, live ou error).
     els.statusLed.className = 'status-led' + (mode ? ' ' + mode : '');
     els.statusText.textContent = text;
   }
 
   function showAlert(message) {
+    // hidden controla a visibilidade sem remover o elemento do layout lógico.
     els.alertBar.hidden = false;
     els.alertBar.textContent = message;
   }
@@ -103,6 +122,8 @@
   /* ------------------------------------------------------------------ */
 
   async function fetchCMEData() {
+    // Fluxo principal do painel: validar datas, consultar o Supabase, adaptar
+    // os registros e redesenhar todos os componentes da tela.
     const start = els.startDate.value;
     const end = els.endDate.value;
 
@@ -124,6 +145,7 @@
     const endISO = `${end}T23:59:59`;
 
     // Usar sintaxe PostgREST para combinar filtros de data
+    // PostgREST combina as duas condições com AND para limitar o período.
     const dateFilter = `and=(start_time.gte.${encodeURIComponent(startISO)},start_time.lte.${encodeURIComponent(endISO)})`;
     const url = `${SUPABASE_ENDPOINT}/cme_events?${dateFilter}&order=start_time.desc&limit=1000`;
 
@@ -139,6 +161,7 @@
         throw new Error(`Falha na requisição ao Supabase (HTTP ${res.status}).`);
       }
 
+      // json() converte o corpo da resposta HTTP de texto para array/objetos JS.
       const data = await res.json();
 
       if (!Array.isArray(data) || data.length === 0) {
@@ -150,6 +173,8 @@
         return;
       }
 
+      // A API usa nomes de banco (snake_case); a interface usa nomes mais
+      // convenientes em JavaScript (camelCase). normalizeEvent faz essa ponte.
       currentEvents = data.map(normalizeEvent);
       renderAll();
       setStatus('live', `${currentEvents.length} EVENT(S) LOADED`);
@@ -167,6 +192,8 @@
   /* ------------------------------------------------------------------ */
 
   function normalizeEvent(record) {
+    // Mantém a aplicação desacoplada do formato do banco: se o nome de uma
+    // coluna mudar, normalmente basta ajustar esta função.
     return {
       id: record.activity_id,
       startTime: record.start_time,
@@ -189,6 +216,8 @@
   /* ------------------------------------------------------------------ */
 
   function renderStats() {
+    // Eventos sem velocidade não entram na média nem na busca do máximo, pois
+    // não há um número confiável para calcular nesses casos.
     const withSpeed = currentEvents.filter(e => typeof e.speed === 'number');
     const total = currentEvents.length;
     const avgSpeed = withSpeed.length
@@ -210,6 +239,8 @@
   /* ------------------------------------------------------------------ */
 
   function sortedEvents() {
+    // Cria uma cópia antes de sort para não alterar a ordem armazenada em
+    // currentEvents (o usuário pode alternar o critério sem perder os dados).
     const list = [...currentEvents];
     if (currentSort === 'speed') {
       list.sort((a, b) => (b.speed || 0) - (a.speed || 0));
@@ -220,6 +251,8 @@
   }
 
   function renderList() {
+    // Reconstrói a lista inteira a partir do estado atual. Isso simplifica a
+    // sincronização entre filtro, ordenação e conteúdo do Supabase.
     const list = sortedEvents();
     els.listCount.textContent = `${currentEvents.length} registro(s)`;
 
@@ -255,6 +288,7 @@
   }
 
   function formatDateTime(iso) {
+    // Converte o timestamp ISO recebido do banco para uma leitura pt-BR.
     if (!iso) return '—';
     const d = new Date(iso);
     return d.toLocaleString('pt-BR', {
@@ -277,6 +311,8 @@
   /* ------------------------------------------------------------------ */
 
   function isValidUrl(url) {
+    // Só permitimos links HTTP/HTTPS no HTML do modal; isso evita transformar
+    // um valor vindo do banco em um link com protocolo inesperado.
     if (!url) return false;
     try {
       const parsed = new URL(url);
@@ -287,6 +323,7 @@
   }
 
   function openModal(id) {
+    // Procura o evento pelo identificador gravado no card e monta seus detalhes.
     const e = currentEvents.find(ev => ev.id === id);
     if (!e) return;
 
@@ -318,11 +355,15 @@
   }
 
   function closeModal() {
+    // Esconde o modal sem destruir seu conteúdo; ele será atualizado na próxima
+    // abertura.
     els.modalOverlay.style.display = 'none';
     els.modalOverlay.hidden = true;
   }
 
   function escapeHtml(str) {
+    // textContent trata a entrada como texto. innerHTML devolve a versão
+    // escapada para podermos inseri-la em templates HTML com segurança.
     if (str == null) return '';
     const div = document.createElement('div');
     div.textContent = String(str);
@@ -342,8 +383,11 @@
   /* ------------------------------------------------------------------ */
 
   function renderChart() {
+    // O canvas é redesenhado do zero porque ele não mantém objetos de gráfico:
+    // cada linha, ponto e área precisa ser pintado novamente.
     const canvas = els.chart;
     const ctx = canvas.getContext('2d');
+    // DPR melhora a nitidez em telas Retina/HiDPI sem mudar o tamanho visual.
     const dpr = window.devicePixelRatio || 1;
     const cssWidth = canvas.clientWidth || 900;
     const cssHeight = 280;
@@ -353,6 +397,7 @@
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, cssWidth, cssHeight);
 
+    // O gráfico só usa eventos com velocidade e os coloca em ordem cronológica.
     const points = [...currentEvents]
       .filter(e => typeof e.speed === 'number')
       .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
@@ -371,10 +416,11 @@
     const minSpeed = 0;
     const maxSpeed = Math.max(...speeds) * 1.1;
 
+    // Estas funções transformam índice/velocidade em coordenadas do canvas.
     const xFor = (i) => padding.left + (points.length === 1 ? w / 2 : (i / (points.length - 1)) * w);
     const yFor = (v) => padding.top + h - ((v - minSpeed) / (maxSpeed - minSpeed)) * h;
 
-    // grid lines
+    // Linhas de grade ajudam a comparar visualmente as velocidades.
     ctx.strokeStyle = 'rgba(61,255,122,0.12)';
     ctx.lineWidth = 1;
     ctx.font = '10px JetBrains Mono, monospace';
@@ -390,7 +436,7 @@
       ctx.fillText(Math.round(v).toString(), 6, y + 3);
     }
 
-    // danger threshold line at 1000 km/s if in range
+    // 1000 km/s é usado visualmente como limiar de evento rápido.
     if (maxSpeed > 1000) {
       const y = yFor(1000);
       ctx.strokeStyle = 'rgba(255,77,94,0.5)';
@@ -402,7 +448,7 @@
       ctx.setLineDash([]);
     }
 
-    // area fill
+    // Preenche a área sob a curva para dar sensação de volume aos dados.
     ctx.beginPath();
     ctx.moveTo(xFor(0), yFor(0));
     points.forEach((p, i) => ctx.lineTo(xFor(i), yFor(Number(p.speed))));
@@ -414,7 +460,7 @@
     ctx.fillStyle = grad;
     ctx.fill();
 
-    // line
+    // Desenha a linha principal com brilho verde do tema.
     ctx.beginPath();
     points.forEach((p, i) => {
       const x = xFor(i), y = yFor(Number(p.speed));
@@ -427,7 +473,7 @@
     ctx.stroke();
     ctx.shadowBlur = 0;
 
-    // points
+    // Cada evento vira um ponto; eventos rápidos ficam vermelhos.
     points.forEach((p, i) => {
       const x = xFor(i), y = yFor(Number(p.speed));
       const fast = Number(p.speed) >= 1000;
@@ -447,6 +493,8 @@
   /* ------------------------------------------------------------------ */
 
   async function fetchLastUpdate() {
+    // Busca a execução mais recente do pipeline para informar até quando os
+    // dados do painel foram atualizados.
     try {
       const url = `${SUPABASE_ENDPOINT}/execucoes?order=executed_at.desc&limit=1`;
       const res = await fetch(url, {
@@ -477,6 +525,8 @@
   /* ------------------------------------------------------------------ */
 
   function renderAll() {
+    // Um único ponto de sincronização garante que todos os componentes usem o
+    // mesmo conjunto de eventos.
     renderStats();
     renderList();
     renderChart();
@@ -488,7 +538,7 @@
 
   els.fetchBtn.addEventListener('click', fetchCMEData);
 
-  // Auto-run on load
+  // Ao abrir a página, carregamos dados e também a data da última execução.
   fetchCMEData();
   fetchLastUpdate();
 

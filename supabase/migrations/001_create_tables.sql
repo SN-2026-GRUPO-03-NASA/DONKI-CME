@@ -5,23 +5,23 @@
 
 -- Tabela principal de eventos CME
 CREATE TABLE IF NOT EXISTS cme_events (
-    id BIGSERIAL PRIMARY KEY,
-    activity_id TEXT UNIQUE NOT NULL,
-    start_time TIMESTAMPTZ,
-    source_location TEXT,
-    note TEXT,
-    instruments JSONB DEFAULT '[]'::jsonb,
-    speed NUMERIC,
-    type TEXT,
-    is_earth_directed BOOLEAN DEFAULT FALSE,
-    latitude NUMERIC,
-    longitude NUMERIC,
-    half_angle NUMERIC,
-    link TEXT,
-    linked_events JSONB DEFAULT '[]'::jsonb,
-    fetched_at TIMESTAMPTZ DEFAULT NOW(),
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    updated_at TIMESTAMPTZ DEFAULT NOW()
+    id BIGSERIAL PRIMARY KEY, -- Identificador interno gerado automaticamente.
+    activity_id TEXT UNIQUE NOT NULL, -- ID da NASA; evita duplicação.
+    start_time TIMESTAMPTZ, -- Momento da CME, com fuso horário.
+    source_location TEXT, -- Região solar de origem.
+    note TEXT, -- Observações da NASA.
+    instruments JSONB DEFAULT '[]'::jsonb, -- Instrumentos usados na observação.
+    speed NUMERIC, -- Velocidade em km/s.
+    type TEXT, -- Tipo/classificação da CME.
+    is_earth_directed BOOLEAN DEFAULT FALSE, -- Heurística calculada no pipeline.
+    latitude NUMERIC, -- Latitude da origem solar.
+    longitude NUMERIC, -- Longitude da origem solar.
+    half_angle NUMERIC, -- Meio-ângulo da ejeção.
+    link TEXT, -- Link do registro no DONKI.
+    linked_events JSONB DEFAULT '[]'::jsonb, -- Eventos relacionados.
+    fetched_at TIMESTAMPTZ DEFAULT NOW(), -- Momento da coleta.
+    created_at TIMESTAMPTZ DEFAULT NOW(), -- Momento da inserção.
+    updated_at TIMESTAMPTZ DEFAULT NOW() -- Momento da última alteração.
 );
 
 -- Índices para performance
@@ -31,13 +31,13 @@ CREATE INDEX IF NOT EXISTS idx_cme_events_earth_directed ON cme_events(is_earth_
 
 -- Tabela de registro de execuções do pipeline
 CREATE TABLE IF NOT EXISTS execucoes (
-    id BIGSERIAL PRIMARY KEY,
-    executed_at TIMESTAMPTZ DEFAULT NOW(),
-    registros_processados INTEGER DEFAULT 0,
-    lotes INTEGER DEFAULT 0,
-    erros INTEGER DEFAULT 0,
-    status TEXT NOT NULL CHECK (status IN ('concluido', 'erro_parcial', 'erro_critico')),
-    detalhes TEXT
+    id BIGSERIAL PRIMARY KEY, -- Identificador da execução.
+    executed_at TIMESTAMPTZ DEFAULT NOW(), -- Quando a execução foi registrada.
+    registros_processados INTEGER DEFAULT 0, -- Registros processados com sucesso.
+    lotes INTEGER DEFAULT 0, -- Quantidade de lotes enviados.
+    erros INTEGER DEFAULT 0, -- Quantidade de lotes com erro.
+    status TEXT NOT NULL CHECK (status IN ('concluido', 'erro_parcial', 'erro_critico')), -- Estado final.
+    detalhes TEXT -- Detalhes para diagnóstico.
 );
 
 -- Índice para consultas recentes
@@ -47,6 +47,7 @@ CREATE INDEX IF NOT EXISTS idx_execucoes_executed_at ON execucoes(executed_at DE
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
+    -- NEW é a nova versão da linha; a função atualiza somente o timestamp.
     NEW.updated_at = NOW();
     RETURN NEW;
 END;
