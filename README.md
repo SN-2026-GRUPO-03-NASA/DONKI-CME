@@ -91,7 +91,7 @@ python scripts/fetch_nasa.py
 
 ## 🛠️ Tecnologias
 
-Python · Supabase (PostgreSQL) · GitHub Actions · GitHub Pages · JavaScript · Chart.js · HTML/CSS
+Python · Supabase (PostgreSQL) · GitHub Actions · GitHub Pages · JavaScript · Canvas · HTML/CSS
 
 ## 📡 Fonte dos dados
 

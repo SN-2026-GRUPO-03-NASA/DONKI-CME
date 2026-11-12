@@ -81,9 +81,8 @@ as permissões estão revisadas e nenhuma chave privilegiada está exposta.
 
 ## 3. Corrigir inconsistências e fazer uma revisão técnica
 
--   [ ] Revisar o `README.md`: o gráfico é desenhado com Canvas, então
-    remover ou corrigir as menções a Chart.js se a biblioteca não
-    estiver sendo utilizada.
+-   [x] Revisar o `README.md`: o gráfico é desenhado com Canvas e a
+    documentação não depende de uma biblioteca externa de gráficos.
 -   [ ] Substituir todos os links e textos provisórios, como
     `SEU-USUARIO`, `SEU_PROJETO` e URLs de exemplo.
 -   [ ] Adicionar capturas de tela reais do dashboard, da execução
