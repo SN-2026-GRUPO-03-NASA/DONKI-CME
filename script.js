@@ -496,7 +496,7 @@
     // Busca a execução mais recente do pipeline para informar até quando os
     // dados do painel foram atualizados.
     try {
-      const url = `${SUPABASE_ENDPOINT}/execucoes?order=executed_at.desc&limit=1`;
+      const url = `${SUPABASE_ENDPOINT}/execucoes?executed_at=not.is.null&order=executed_at.desc&limit=1`;
       const res = await fetch(url, {
         headers: {
           'apikey': SUPABASE_ANON_KEY,
@@ -510,6 +510,10 @@
       if (Array.isArray(data) && data.length > 0) {
         const lastExec = data[0];
         const date = new Date(lastExec.executed_at);
+        if (Number.isNaN(date.getTime())) {
+          els.lastUpdateText.textContent = 'Indisponível';
+          return;
+        }
         els.lastUpdateText.textContent = date.toLocaleString('pt-BR', {
           day: '2-digit', month: '2-digit', year: 'numeric',
           hour: '2-digit', minute: '2-digit', hour12: false,
